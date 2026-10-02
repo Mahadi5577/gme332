@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "gme332: reproducibility code for the exact PPT-mixture threshold of the (3,3,2) GHZ state"
+version: 1.0.0
+date-released: 2026-10-02
+repository-code: "https://github.com/Mahadi5577/gme332"
+authors:
+  - family-names: Amin
+    given-names: MD. Nurol
+    email: amin15-5577@diu.edu.bd
+    affiliation: Daffodil International University, Dhaka, Bangladesh

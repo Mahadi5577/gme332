@@ -1,0 +1,27 @@
+# Measured density-matrix elements of the (3,3,2) three-photon state.
+# Source: M. Malik et al., "Multi-photon entanglement in high dimensions",
+#         Nat. Photon. 10, 248-252 (2016), arXiv:1509.02561, Extended Data Table 1.
+# Labels are the authors' OAM labels: A, B in {-1,0,1}, C in {0,1}.
+# kind = pop (diagonal element <ABC|rho|ABC>) or coh (off-diagonal <row|rho|col>).
+kind,row_A,row_B,row_C,col_A,col_B,col_C,re,im
+pop,-1,-1,0,-1,-1,0,0.003,0
+pop,0,-1,0,0,-1,0,0.009,0
+pop,1,-1,0,1,-1,0,0.003,0
+pop,-1,0,0,-1,0,0,0.006,0
+pop,0,0,0,0,0,0,0.296,0
+pop,1,0,0,1,0,0,0.011,0
+pop,-1,1,0,-1,1,0,0.000,0
+pop,0,1,0,0,1,0,0.014,0
+pop,1,1,0,1,1,0,0.003,0
+pop,-1,-1,1,-1,-1,1,0.006,0
+pop,0,-1,1,0,-1,1,0.017,0
+pop,1,-1,1,1,-1,1,0.290,0
+pop,-1,0,1,-1,0,1,0.006,0
+pop,0,0,1,0,0,1,0.003,0
+pop,1,0,1,1,0,1,0.003,0
+pop,-1,1,1,-1,1,1,0.313,0
+pop,0,1,1,0,1,1,0.014,0
+pop,1,1,1,1,1,1,0.003,0
+coh,0,0,0,1,-1,1,0.190,-0.133
+coh,0,0,0,-1,1,1,0.178,-0.129
+coh,1,-1,1,-1,1,1,0.297,-0.026

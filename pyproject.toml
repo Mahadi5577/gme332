@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gme332"
+version = "1.0.0"
+description = "Exact PPT-mixture certification of genuine multipartite entanglement for the asymmetric (3,3,2) GHZ state"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "MD. Nurol Amin", email = "amin15-5577@diu.edu.bd" }]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "cvxpy>=1.5",
+    "clarabel>=0.9",
+    "matplotlib>=3.8",
+    "qutip>=5.0",
+    "qiskit>=2.0",
+    "qiskit-aer>=0.17",
+    "qiskit-ibm-runtime>=0.40",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+gme332 = "gme332.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"gme332.data" = ["*.csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not slow'"
+markers = ["slow: numerical SDP or Qiskit tests (tens of seconds)"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]

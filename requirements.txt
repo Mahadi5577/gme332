@@ -1,0 +1,12 @@
+# Exact versions used to produce the paper's numbers (Python 3.12.10, Windows 11).
+# Looser bounds are in pyproject.toml.
+numpy==2.3.4
+scipy==1.16.3
+cvxpy==1.9.2
+clarabel==0.11.1
+matplotlib==3.11.0
+qutip==5.3.0
+qiskit==2.5.2
+qiskit-aer==0.17.2
+qiskit-ibm-runtime==0.50.0
+pytest==9.1.1

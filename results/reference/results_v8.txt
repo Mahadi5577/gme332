@@ -1,0 +1,73 @@
+numpy 2.3.4 | cvxpy 1.9.2 | qutip 5.3.0 | qiskit 2.5.2 | qiskit-aer 0.17.2 | qiskit-ibm-runtime 0.50.0
+
+========================================================================
+  Phase 0 - Fidelity witness
+========================================================================
+  largest squared Schmidt coefficient per cut: {'A|BC': 0.6666666667, 'AB|C': 0.3333333333, 'AC|B': 0.3333333333}
+  alpha = 0.6666666667 (2/3)   p*_F = D(1-alpha)/(D-1) = 0.3529411765 (6/17)
+
+========================================================================
+  Phase 1 - Partial-transpose spectra
+========================================================================
+  A|BC: min eigenvalue = -0.47140452   negativity = 0.47140452
+  AB|C: min eigenvalue = -0.33333333   negativity = 1.00000000
+  AC|B: min eigenvalue = -0.33333333   negativity = 1.00000000
+
+========================================================================
+  Phase 2 - PPT-mixture criterion: exact witness, exact primal, SDP
+========================================================================
+  d=2: W_d = P_k + T_k(Q_k) exact: True, P_k,Q_k PSD exact: True, Tr W~ = 4 + 2*sqrt(1), Tr(W~ rho_psi) = -1 + 0*sqrt(1), p* = 0.5714285714
+  d=3: W_d = P_k + T_k(Q_k) exact: True, P_k,Q_k PSD exact: True, Tr W~ = 8 + 2*sqrt(2), Tr(W~ rho_psi) = -4/3 + 0*sqrt(2), p* = 0.6890922726
+  d=4: W_d = P_k + T_k(Q_k) exact: True, P_k,Q_k PSD exact: True, Tr W~ = 12 + 2*sqrt(3), Tr(W~ rho_psi) = -3/2 + 0*sqrt(3), p* = 0.7563330888
+  d=5: W_d = P_k + T_k(Q_k) exact: True, P_k,Q_k PSD exact: True, Tr W~ = 16 + 2*sqrt(4), Tr(W~ rho_psi) = -8/5 + 0*sqrt(4), p* = 0.8000000000
+  d=6: W_d = P_k + T_k(Q_k) exact: True, P_k,Q_k PSD exact: True, Tr W~ = 20 + 2*sqrt(5), Tr(W~ rho_psi) = -5/3 + 0*sqrt(5), p* = 0.8306099941
+  d=3: c = Tr(W rho_psi)/Tr W = -4/21 + 1/21*sqrt(2)  (= -(4-sqrt2)/21)
+       p* = 96/127 + -6/127*sqrt(2)  (= 12/(16+sqrt2) = 6(16-sqrt2)/127)
+  exact primal PPT-mixture decomposition at p*: sum exact = True, all six PSD conditions exact = True, complementary slackness = True
+  numerical primal threshold = 0.6890922719; numerical dual c_min = -0.1231326855
+  pitfall check: program with only W + T_k(W) >= 0 gives -0.166667 (naive threshold 0.7500) but its optimiser has expectation -0.078117 on a product state -> not a witness
+  family d=2: SDP threshold 0.5714285692   W_d formula 0.5714285714   diff -2.2e-09
+  family d=3: SDP threshold 0.6890922724   W_d formula 0.6890922726   diff -2.0e-10
+  family d=4: SDP threshold 0.7563330869   W_d formula 0.7563330888   diff -1.9e-09
+  family d=5: SDP threshold 0.7999999903   W_d formula 0.8000000000   diff -9.7e-09
+  family d=6: SDP threshold 0.8312379341   W_d formula 0.8306099941   diff +6.3e-04
+
+========================================================================
+  Phase 3 - Lindblad dynamics
+========================================================================
+  dN/dt|0+ A|BC: -0.170462   (finite difference -0.170462)
+  dN/dt|0+ AB|C: -0.326667   (finite difference -0.326667)
+  dN/dt|0+ AC|B: -0.326667   (finite difference -0.326667)
+  monotone per-cut decay on 561-point grid: {'A|BC': True, 'AB|C': True, 'AC|B': True}
+  exact ESD times: {'A|BC': 8.9688, 'AB|C': 10.7684, 'AC|B': 10.7684}
+  QuTiP mesolve cross-check: max |rho_qutip - rho_exact| = 1.4e-10
+  N_g(0) = 0.471405   GME lifetime (PPT-mixture boundary) tau_GME = 6.1722
+
+========================================================================
+  Phase 3b - gamma_corr sweep
+========================================================================
+  gamma_corr=0.000: ESD A|BC=9.0659  AB|C=10.8474  AC|B=10.8474   tau_GME=6.2121
+  gamma_corr=0.005: ESD A|BC=9.0412  AB|C=10.8272  AC|B=10.8272   tau_GME=6.2020
+  gamma_corr=0.010: ESD A|BC=9.0168  AB|C=10.8074  AC|B=10.8074   tau_GME=6.1919
+  gamma_corr=0.020: ESD A|BC=8.9688  AB|C=10.7684  AC|B=10.7684   tau_GME=6.1722
+  gamma_corr=0.040: ESD A|BC=8.8761  AB|C=10.6935  AC|B=10.6935   tau_GME=6.1342
+  gamma_corr=0.080: ESD A|BC=8.7029  AB|C=10.5546  AC|B=10.5546   tau_GME=6.0635
+
+========================================================================
+  Phase 4 - Noisy-device simulation (FakeSherbrooke, local encoding)
+========================================================================
+  backend fake_sherbrooke, physical qubits [60, 59, 61, 58, 53], ECR count 6, depth 30
+  T1 (us) [447.5 308.4 299.2 467.3 275.7]  T2 (us) [451.  320.6 360.3  46.2 400.5]
+  readout errors [0.0105 0.0254 0.0308 0.0093 0.0264]  ECR errors [0.0054 0.0046 0.0041 0.0035]
+  register fidelity F = 0.9674 (> 2/3: True)
+  post-selection probability = 0.9938, post-selected fidelity = 0.9734
+  Tr(W_3 rho) register = -0.11712, post-selected = -0.11784
+  extra white noise tolerated before PPT mixture: register 0.7894, post-selected 0.6796
+
+========================================================================
+  Phase 5 - Re-analysis of the photonic (3,3,2) experiment (Malik et al. 2016)
+========================================================================
+  fidelity with local phases aligned = 0.7996  (reported 0.801 +- 0.018)
+  Tr(W~3 rho_exp) <= -0.8171   normalised Tr(W3 rho_exp) <= -0.0755
+  extra white noise tolerated: witness 0.576, fidelity test 0.179
+  witness negative unless |rho_000,111| + |rho_000,122| < 0.0432 (measured 0.4518)
