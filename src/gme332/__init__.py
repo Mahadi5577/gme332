@@ -9,4 +9,4 @@ Submodules (import what you need; heavy dependencies load lazily):
     figures, pipeline, cli       figures, timed pipeline, command line
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"

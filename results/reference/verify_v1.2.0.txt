@@ -1,0 +1,8 @@
+d=2: witness W_d fully decomposable (exact) = True; p*(d) = 0.5714285714
+d=3: witness W_d fully decomposable (exact) = True; p*(d) = 0.6890922726
+d=4: witness W_d fully decomposable (exact) = True; p*(d) = 0.7563330888
+d=5: witness W_d fully decomposable (exact) = True; p*(d) = 0.8000000000
+d=6: witness W_d fully decomposable (exact) = True; p*(d) = 0.8306099941
+d=3: exact PPT-mixture decomposition of rho(p*) valid = True, complementary slackness = True, p* = 96/127 + -6/127*sqrt(2)
+d=3: rho(p*) biseparable (exact; true GME threshold = p*) = True
+ALL EXACT CERTIFICATES VERIFIED

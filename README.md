@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23400667.svg)](https://doi.org/10.5281/zenodo.23400667)
 
-Reproducibility code for **"Exact PPT-mixture threshold for the asymmetric (3,3,2) GHZ state and analytic witnesses for the 2×d×d family"** (MD. Nurol Amin, manuscript submitted, 2026).
+Reproducibility code for **"Exact white-noise threshold for genuine multipartite entanglement of the asymmetric (3,3,2) GHZ state"** (MD. Nurol Amin, manuscript submitted, 2026).
 
 The target state is
 
@@ -17,7 +17,7 @@ This is the (3,3,2) state realised with photons by Malik *et al.*, Nat. Photon. 
 | Result | Value | Phase |
 |---|---|---|
 | Fidelity-witness threshold | p\*_F = 6/17 ≈ 35.29 % | 0 |
-| PPT-mixture threshold, proven exactly by an explicit witness and an exact PPT-mixture decomposition | p\* = 12/(16+√2) ≈ 68.91 % | 2 |
+| **True GME threshold**: GME iff p < p\*, proven by an explicit witness and an exact *biseparable* decomposition (so the PPT-mixture criterion is exact) | p\* = 12/(16+√2) ≈ 68.91 % | 2 |
 | 2×d×d family bound: exact at d = 2, 3, tight for d = 4, 5, suboptimal for d ≥ 6 (primal SDP d ≤ 6, block-reduced dual SDP d ≤ 8) | p\*(d) = 2d(d−1)/(2(d²−1)+√(d−1)) | 2 |
 | GME lifetime vs first bipartite sudden death (bracketed, with kernel term of dN/dt) | τ_GME = 6.172 vs τ_ESD = 8.969 | 3 |
 | Noisy-device simulation (FakeSherbrooke, 6 ECR) | F = 0.9674, Tr(W₃ρ) = −0.117 | 4 |
@@ -36,7 +36,7 @@ Python ≥ 3.10. `qiskit-ibm-runtime` is needed only for phase 4.
 ## Use
 
 ```bash
-gme332 verify                     # exact certificates only (pure rational arithmetic), < 1 s
+gme332 verify                     # exact certificates incl. biseparability of rho(p*) (pure rational arithmetic), < 1 s
 gme332 run                        # full pipeline, all phases, about 14 min (see below)
 gme332 run --phases 2 5           # selected phases
 gme332 run --quick                # smoke test: same code paths, fewer points
@@ -44,9 +44,10 @@ gme332 run --fig-dir ../TQE_Template   # write the paper figures straight into t
 python -m pytest                  # fast tests (about 5 s)
 python -m pytest -m slow          # SDP and Qiskit cross-checks (about 15 s)
 python tools/build_notebook.py    # regenerate the Colab notebook from src/ (--check to verify)
+python scripts/biseparable_search.py 4 45   # numerical biseparability search for d = 4 (~22 min; reference log in results/reference/)
 ```
 
-`gme332 run` writes `results/results.txt` (log), `results/timings.json` and `results/figures/` (vector PDF and 300-dpi PNG). The reference output used for the paper is `results/reference/results_v1.1.0.txt` (`results_v8.txt` is the earlier v1.0 log).
+`gme332 run` writes `results/results.txt` (log), `results/timings.json` and `results/figures/` (vector PDF and 300-dpi PNG). The reference outputs used for the paper are `results/reference/results_v1.1.0.txt` (full pipeline; the v1.2.0 code produces the same numbers and adds one line on biseparability), `results/reference/verify_v1.2.0.txt` (all exact certificates, including the biseparable decomposition that proves the GME threshold) and `results/reference/biseparable_search_d4.log` (numerical d = 4 search). `results_v8.txt` is the v1.0 log.
 
 Every SDP checks the solver status: `optimal` is accepted, `optimal_inaccurate` raises a visible `RuntimeWarning`, anything else stops the run with `SolverError`.
 
@@ -86,6 +87,7 @@ gme332/
 │   └── cli.py            `gme332` command
 ├── tests/                pytest suite (fast + `-m slow`)
 ├── tools/build_notebook.py   generates the notebook from src/ (tested: no drift)
+├── scripts/biseparable_search.py   numerical biseparability search (d = 4 bracket in the paper)
 ├── notebooks/GME_Q1.ipynb   self-contained Colab notebook (generated; same code in one cell)
 ├── results/reference/    reference log and figures used in the paper
 ├── LICENSE (MIT), CITATION.cff, .zenodo.json
@@ -96,7 +98,7 @@ The notebook is kept for Colab users. It is generated from the package sources, 
 
 ## Citation
 
-MD. Nurol Amin, *Exact PPT-mixture threshold for the asymmetric (3,3,2) GHZ state and analytic witnesses for the 2×d×d family* (manuscript submitted, 2026). Citation metadata is in `CITATION.cff`; archived on Zenodo: version 1.1.0 at https://doi.org/10.5281/zenodo.23400667 (all versions: https://doi.org/10.5281/zenodo.23400666).
+MD. Nurol Amin, *Exact white-noise threshold for genuine multipartite entanglement of the asymmetric (3,3,2) GHZ state* (manuscript submitted, 2026). Citation metadata is in `CITATION.cff`; archived on Zenodo: version 1.1.0 at https://doi.org/10.5281/zenodo.23400667 (all versions: https://doi.org/10.5281/zenodo.23400666).
 
 ## License
 

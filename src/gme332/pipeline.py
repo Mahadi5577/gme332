@@ -16,7 +16,8 @@ from typing import Dict, Iterable, Tuple
 import numpy as np
 
 from . import figures
-from .certificates import exact_primal_certificate_d3, verify_witness_family
+from .certificates import (biseparability_certificate_d3, exact_primal_certificate_d3,
+                           verify_witness_family)
 from .config import CUTS, DIMS
 from .dynamics import Propagator, collapse_operators, esd_time, gme_lifetime, liouvillian
 from .experiment import malik2016_certificate
@@ -104,6 +105,9 @@ def phase2(ctx: Context):
     print(f"  exact primal PPT-mixture decomposition at p*: sum exact = {primal['sum_equals_rho']}, "
           f"all six PSD conditions exact = {primal['all_ok']}, "
           f"complementary slackness = {primal['complementary_slackness']}")
+    bis = biseparability_certificate_d3()
+    print(f"  exact biseparable decomposition of rho(p*): {bis['biseparable']} "
+          f"({sum(bis['checks'].values())}/{len(bis['checks'])} conditions) -> true GME threshold = p*")
     q_num = ppt_mixture_noise_threshold(rho0, DIMS)
     c_num, _ = decomposable_witness_value(rho0, DIMS)
     print(f"  numerical primal threshold = {q_num:.10f}; numerical dual c_min = {c_num:.10f}")
@@ -129,7 +133,7 @@ def phase2(ctx: Context):
         print(f"  family dual d={d}: c_min = {r['c_min']:.6f} (W_d: {cw:.6f})   threshold {r['threshold']:.6f} "
               f"(W_d formula {pw:.6f}, diff {r['threshold'] - pw:+.1e})")
     figures.fig_thresholds(wit, family, s.fig_dir)
-    ctx.out.update(witness=wit, primal=primal, q_num=q_num, c_num=c_num, pitfall=pit, family=family,
+    ctx.out.update(biseparability=bis, witness=wit, primal=primal, q_num=q_num, c_num=c_num, pitfall=pit, family=family,
                    family_dual=dual)
 
 

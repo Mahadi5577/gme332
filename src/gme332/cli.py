@@ -44,7 +44,8 @@ def _versions() -> str:
 
 
 def cmd_verify(_args) -> int:
-    from .certificates import exact_primal_certificate_d3, verify_witness_family
+    from .certificates import (biseparability_certificate_d3, exact_primal_certificate_d3,
+                               verify_witness_family)
     ok = True
     for d in range(2, 7):
         v = verify_witness_family(d)
@@ -56,6 +57,9 @@ def cmd_verify(_args) -> int:
     ok &= p["all_ok"] and p["complementary_slackness"]
     print(f"d=3: exact PPT-mixture decomposition of rho(p*) valid = {p['all_ok']}, "
           f"complementary slackness = {p['complementary_slackness']}, p* = {p['p_star']}")
+    b = biseparability_certificate_d3()
+    ok &= b["biseparable"]
+    print(f"d=3: rho(p*) biseparable (exact; true GME threshold = p*) = {b['biseparable']}")
     print("ALL EXACT CERTIFICATES VERIFIED" if ok else "VERIFICATION FAILED")
     return 0 if ok else 1
 

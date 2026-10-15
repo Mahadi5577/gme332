@@ -15,3 +15,4 @@ results/timings.json
 notebooks/figures/
 results/quick/
 results/run_console.txt
+*.pkl

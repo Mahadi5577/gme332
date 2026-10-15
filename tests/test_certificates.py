@@ -28,3 +28,9 @@ def test_d3_threshold_and_witness_value_exact():
 def test_exact_primal_decomposition():
     p = exact_primal_certificate_d3()
     assert p["sum_equals_rho"] and p["all_ok"] and p["complementary_slackness"]
+
+
+def test_rho_pstar_is_biseparable():
+    from gme332.certificates import biseparability_certificate_d3
+    r = biseparability_certificate_d3()
+    assert r["biseparable"], {k: v for k, v in r["checks"].items() if not v}

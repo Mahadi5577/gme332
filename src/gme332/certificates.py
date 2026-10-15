@@ -115,4 +115,72 @@ def exact_primal_certificate_d3() -> Dict:
     return dict(p_star=p_star, checks=checks, sum_equals_rho=sums_ok,
                 complementary_slackness=slack_zero,
                 all_ok=sums_ok and all(c["rho_psd"] and c["pt_psd"] for c in checks.values()),
-                rho_parts={k: v.to_numpy() for k, v in parts.items()})
+                rho_parts={k: v.to_numpy() for k, v in parts.items()},
+                parts_exact=parts)
+
+
+def _sub(M: ExMat, keep) -> ExMat:
+    """Principal submatrix of an exact matrix on the index list `keep`."""
+    pos = {k: i for i, k in enumerate(keep)}
+    out = ExMat(len(keep), M.m)
+    for (i, j), v in M.e.items():
+        if i in pos and j in pos:
+            out.add(pos[i], pos[j], v)
+    return out
+
+
+def biseparability_certificate_d3() -> Dict:
+    """Exact proof that rho(p*) is BISEPARABLE (so p* = 12/(16+sqrt2) is the true GME threshold).
+
+    rho_1 (cut A|BC): all off-diagonal entries lie in C^2 (x) span{00,11,22}_BC; that 2x3 block is
+        PSD and PPT, hence separable (Horodecki 1996); the rest is diagonal (product states).
+    rho_2 (cut AB|C): no coherences between span{01,02}_AB (x) C^3 and span{00,11,12}_AB (x) C^3.
+        The first block is 2x3, PSD and PPT -> separable.  The second has the maximally correlated
+        form sum A_ij |x_i i><x_j j| + sum_{i!=j} B_ij |x_i j><x_i j| with A doubly nonnegative
+        (= completely positive for 3x3, Maxfield-Minc) and A_ij <= B_ij, B_ji -> separable.
+    rho_3 = S rho_2 S is separable across AC|B by symmetry."""
+    dims = [2, 3, 3]
+    ix = lambda s: flat_index(tuple(int(ch) for ch in s), dims)
+    prim = exact_primal_certificate_d3()
+    rho1, rho2 = prim["parts_exact"]["A|BC"], prim["parts_exact"]["AB|C"]
+    labels = ["".join(map(str, (a, b, c))) for a in range(2) for b in range(3) for c in range(3)]
+    checks = {}
+
+    # rho_1: support and the 2x3 block
+    X1 = [ix(l) for l in labels if l[1:] in ("00", "11", "22")]
+    off_outside = [(i, j) for (i, j) in rho1.e if i != j and not (i in X1 and j in X1)]
+    checks["rho1: off-diagonal entries only in C2 x span{00,11,22}"] = not off_outside
+    checks["rho1: 2x3 block PSD"] = ex_is_psd(_sub(rho1, X1))
+    checks["rho1: 2x3 block PPT"] = ex_is_psd(_sub(ex_partial_transpose(rho1, dims, (0,)), X1))
+    checks["rho1: remaining diagonal >= 0"] = all(rho1.e.get((k, k), QSqrt(0, 0, 2)).sign() >= 0
+                                                  for k in range(18) if k not in X1)
+
+    # rho_2: block structure
+    S2 = [ix(l) for l in labels if l[:2] in ("01", "02")]
+    S1 = [ix(l) for l in labels if l[:2] in ("00", "11", "12")]
+    cross = [(i, j) for (i, j) in rho2.e if (i in S1) != (j in S1)]
+    outside = [(i, j) for (i, j) in rho2.e if i not in S1 + S2 or j not in S1 + S2]
+    checks["rho2: no coherences between the two blocks"] = not cross and not outside
+    checks["rho2: 2x3 block PSD"] = ex_is_psd(_sub(rho2, S2))
+    checks["rho2: 2x3 block PPT"] = ex_is_psd(_sub(ex_partial_transpose(rho2, dims, (2,)), S2))
+    corr = ["000", "111", "122"]; xs = ["00", "11", "12"]
+    corr_idx = {ix(c) for c in corr}
+    extra = [(i, j) for (i, j) in rho2.e if i != j and i in S1 and j in S1
+             and not (i in corr_idx and j in corr_idx)]
+    checks["rho2: maximally correlated form"] = not extra
+    A = _sub(rho2, [ix(c) for c in corr])
+    checks["rho2: A PSD"] = ex_is_psd(A)
+    zero = QSqrt(0, 0, 2)
+    checks["rho2: A entrywise >= 0"] = all(A.e.get((i, j), zero).sign() >= 0 for i in range(3) for j in range(3))
+    ok_ab = True
+    for i in range(3):
+        for j in range(3):
+            if i == j:
+                continue
+            a = A.e.get((i, j), zero)
+            b_ij = rho2.e.get((ix(xs[i] + str(j)), ix(xs[i] + str(j))), zero)
+            b_ji = rho2.e.get((ix(xs[j] + str(i)), ix(xs[j] + str(i))), zero)
+            ok_ab &= (b_ij - a).sign() >= 0 and (b_ji - a).sign() >= 0
+    checks["rho2: A_ij <= B_ij, B_ji"] = ok_ab
+    checks["decomposition valid (sum, PSD, PT-PSD)"] = prim["all_ok"]
+    return dict(checks=checks, biseparable=all(checks.values()), p_star=prim["p_star"])
