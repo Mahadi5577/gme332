@@ -4,6 +4,11 @@ title: "gme332: reproducibility code for the exact PPT-mixture threshold of the 
 version: 1.1.0
 date-released: 2026-10-15
 license: MIT
+doi: 10.5281/zenodo.23400667
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23400666
+    description: Concept DOI (all versions)
 repository-code: "https://github.com/Mahadi5577/gme332"
 authors:
   - family-names: Amin

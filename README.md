@@ -1,5 +1,7 @@
 # gme332
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23400667.svg)](https://doi.org/10.5281/zenodo.23400667)
+
 Reproducibility code for **"Exact PPT-mixture threshold for the asymmetric (3,3,2) GHZ state and analytic witnesses for the 2×d×d family"** (MD. Nurol Amin, manuscript submitted, 2026).
 
 The target state is
@@ -94,7 +96,7 @@ The notebook is kept for Colab users. It is generated from the package sources, 
 
 ## Citation
 
-MD. Nurol Amin, *Exact PPT-mixture threshold for the asymmetric (3,3,2) GHZ state and analytic witnesses for the 2×d×d family* (manuscript submitted, 2026). Citation metadata is in `CITATION.cff`; an archival DOI will be added with the Zenodo release.
+MD. Nurol Amin, *Exact PPT-mixture threshold for the asymmetric (3,3,2) GHZ state and analytic witnesses for the 2×d×d family* (manuscript submitted, 2026). Citation metadata is in `CITATION.cff`; archived on Zenodo: version 1.1.0 at https://doi.org/10.5281/zenodo.23400667 (all versions: https://doi.org/10.5281/zenodo.23400666).
 
 ## License
 
