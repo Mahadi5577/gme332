@@ -20,10 +20,11 @@ from .certificates import exact_primal_certificate_d3, verify_witness_family
 from .config import CUTS, DIMS
 from .dynamics import Propagator, collapse_operators, esd_time, gme_lifetime, liouvillian
 from .experiment import malik2016_certificate
-from .sdp import (decomposable_witness_value, family_threshold_sdp,
+from .sdp import (decomposable_witness_value, family_threshold_sdp, family_witness_sdp,
                   genuine_multipartite_negativity, ppt_mixture_noise_threshold,
                   weak_constraint_pitfall)
-from .states import ghz_family_ket, negativity, negativity_right_derivative, partial_transpose
+from .states import (ghz_family_ket, negativity, negativity_rate_terms,
+                     negativity_right_derivative, partial_transpose)
 
 ALL_PHASES = ("0", "1", "2", "3", "3b", "4", "5")
 
@@ -36,6 +37,7 @@ class Settings:
     t_max: float = 30.0
     gamma_corr_sweep: Tuple[float, ...] = (0.0, 0.005, 0.01, 0.02, 0.04, 0.08)
     family_dims: Tuple[int, ...] = (2, 3, 4, 5, 6)
+    dual_dims: Tuple[int, ...] = (2, 3, 4, 5, 6, 7, 8)
     ng_points: int = 41
     shots: int = 8192
     noise_margins: bool = True
@@ -44,7 +46,7 @@ class Settings:
     @classmethod
     def quick(cls, **kw):
         """Smoke-test settings: same code paths, fewer points (minutes, not tens of minutes)."""
-        return cls(gamma_corr_sweep=(0.0, 0.08), family_dims=(2, 3, 4), ng_points=6,
+        return cls(gamma_corr_sweep=(0.0, 0.08), family_dims=(2, 3, 4), dual_dims=(2, 3, 4), ng_points=6,
                    shots=2048, noise_margins=False, **kw)
 
 
@@ -114,8 +116,21 @@ def phase2(ctx: Context):
         family[d] = family_threshold_sdp(d)
         print(f"  family d={d}: SDP threshold {family[d]:.10f}   W_d formula "
               f"{float(wit[d]['p_star']):.10f}   diff {family[d] - float(wit[d]['p_star']):+.1e}")
+    D = lambda d: 2 * d * d
+    for d in s.family_dims:                         # optimal c_min implied by the primal threshold
+        c_from_primal = -family[d] / (D(d) * (1 - family[d]))
+        print(f"  family d={d}: c_min implied by primal = {c_from_primal:.6f}   "
+              f"W_d value Tr(W_d rho)/Tr W_d = {float(wit[d]['c_normalised']) if d in wit else float('nan'):.6f}")
+    dual = {}
+    for d in s.dual_dims:
+        dual[d] = r = family_witness_sdp(d)
+        pw = 2 * d * (d - 1) / (2 * (d * d - 1) + (d - 1) ** 0.5)
+        cw = -2 * (d - 1) / d / (4 * (d - 1) + 2 * (d - 1) ** 0.5)
+        print(f"  family dual d={d}: c_min = {r['c_min']:.6f} (W_d: {cw:.6f})   threshold {r['threshold']:.6f} "
+              f"(W_d formula {pw:.6f}, diff {r['threshold'] - pw:+.1e})")
     figures.fig_thresholds(wit, family, s.fig_dir)
-    ctx.out.update(witness=wit, primal=primal, q_num=q_num, c_num=c_num, pitfall=pit, family=family)
+    ctx.out.update(witness=wit, primal=primal, q_num=q_num, c_num=c_num, pitfall=pit, family=family,
+                   family_dual=dual)
 
 
 def phase3(ctx: Context):
@@ -128,9 +143,12 @@ def phase3(ctx: Context):
     rates = {}
     for lbl, k in CUTS.items():
         rates[lbl] = negativity_right_derivative(rho0, drho, DIMS, k)
+        neg_term, ker_term = negativity_rate_terms(rho0, drho, DIMS, k)
         h = 1e-7
         fd = (negativity(prop(h), DIMS, k) - negativity(rho0, DIMS, k)) / h
-        print(f"  dN/dt|0+ {lbl}: {rates[lbl]:+.6f}   (finite difference {fd:+.6f})")
+        print(f"  dN/dt|0+ {lbl}: {rates[lbl]:+.6f}   (finite difference {fd:+.6f}); "
+              f"negative-space term {neg_term:+.6f}, kernel term {ker_term:+.6f}, "
+              f"overstatement without kernel {abs(neg_term) / abs(rates[lbl]) - 1:.1%}")
     times = np.linspace(0, 14, 561)
     per_cut = {lbl: np.array([negativity(prop(t), DIMS, k) for t in times]) for lbl, k in CUTS.items()}
     mono = {lbl: bool(np.max(np.diff(a)) <= 1e-12) for lbl, a in per_cut.items()}
@@ -148,7 +166,13 @@ def phase3(ctx: Context):
     t_ng = np.linspace(0, 10, s.ng_points)
     ng = np.array([genuine_multipartite_negativity(prop(t), DIMS, real=True) for t in t_ng])
     tau = gme_lifetime(prop, DIMS, esd["A|BC"])
-    print(f"  N_g(0) = {ng[0]:.6f}   GME lifetime (PPT-mixture boundary) tau_GME = {tau:.4f}")
+    n_min = min(negativity(rho0, DIMS, k) for k in CUTS.values())
+    print(f"  N_g(0) = {ng[0]:.6f}   (bound min_k N_k = {n_min:.6f})   "
+          f"GME lifetime (PPT-mixture boundary) tau_GME = {tau:.4f}")
+    t_lo, t_hi = round(tau, 2) - 0.01, round(tau, 2) + 0.01
+    v_lo = decomposable_witness_value(prop(t_lo), DIMS, real=True)[0]
+    v_hi = decomposable_witness_value(prop(t_hi), DIMS, real=True)[0]
+    print(f"  tau_GME bracket: witness value {v_lo:+.1e} at t = {t_lo:.2f}, {v_hi:+.1e} at t = {t_hi:.2f}")
     figures.fig_dynamics(times, per_cut, esd, t_ng, ng, tau,
                          (s.gamma_1, s.gamma_phi, s.gamma_corr), s.fig_dir)
     ctx.out.update(rates=rates, esd=esd, monotone=mono, qutip_dev=dev, ng=(t_ng, ng), tau_gme=tau)
@@ -164,6 +188,12 @@ def phase3b(ctx: Context):
         sweep[gc] = dict(esd=e, tau_gme=gme_lifetime(pr, DIMS, e["A|BC"]))
         print(f"  gamma_corr={gc:.3f}: ESD A|BC={e['A|BC']:.4f}  AB|C={e['AB|C']:.4f}  "
               f"AC|B={e['AC|B']:.4f}   tau_GME={sweep[gc]['tau_gme']:.4f}")
+    g0, g1 = min(sweep), max(sweep)
+    if g1 > g0:
+        red = {lbl: 1 - sweep[g1]["esd"][lbl] / sweep[g0]["esd"][lbl] for lbl in CUTS}
+        red["tau_GME"] = 1 - sweep[g1]["tau_gme"] / sweep[g0]["tau_gme"]
+        print(f"  reduction from gamma_corr={g0} to {g1}: " +
+              ", ".join(f"{k} {v:.1%}" for k, v in red.items()))
     figures.fig_gamma_sweep(sweep, s.fig_dir)
     ctx.out["sweep"] = sweep
 
@@ -188,8 +218,15 @@ def phase4(ctx: Context):
 def phase5(ctx: Context):
     sep("Phase 5 - Re-analysis of the photonic (3,3,2) experiment (Malik et al. 2016)")
     m = malik2016_certificate()
-    print(f"  fidelity with local phases aligned = {m['F']:.4f}  (reported 0.801 +- 0.018)")
+    ph = m["coherence_phases_deg"]
+    print(f"  coherence phases (deg): {ph[0]:.1f}, {ph[1]:.1f}, {ph[2]:.1f}; moduli |rho_000,111| = "
+          f"{m['coherence_moduli'][0]:.3f}, |rho_000,122| = {m['coherence_moduli'][1]:.3f}")
+    print(f"  fidelity with the two GHZ coherences aligned = {m['F']:.4f}  (reported 0.801 +- 0.018); "
+          f"residual phase of rho_111,122 = {m['residual_phase_deg']:.2f} deg")
+    print(f"  positivity bound on the unmeasured-coherence term: {m['g_term_bound']:.4f}")
     print(f"  Tr(W~3 rho_exp) <= {m['witness_unnorm']:.4f}   normalised Tr(W3 rho_exp) <= {m['witness']:.4f}")
+    print("  worst case if every element is shifted by delta: " +
+          ", ".join(f"delta={dl}: {v:+.4f}" for dl, v in m["witness_worst_case"].items()))
     print(f"  extra white noise tolerated: witness {m['q_witness']:.3f}, fidelity test {m['q_fidelity']:.3f}")
     print(f"  witness negative unless |rho_000,111| + |rho_000,122| < {m['coherence_sum_needed']:.4f} "
           f"(measured {m['coherence_sum']:.4f})")

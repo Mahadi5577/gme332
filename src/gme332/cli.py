@@ -83,7 +83,9 @@ def cmd_run(args) -> int:
 
 
 def main(argv=None) -> int:
-    warnings.filterwarnings("ignore")
+    # Hide only library deprecation noise; solver-accuracy warnings stay visible.
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=FutureWarning)
     parser = argparse.ArgumentParser(prog="gme332", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)

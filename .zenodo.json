@@ -1,0 +1,19 @@
+{
+  "title": "gme332: reproducibility code for the exact PPT-mixture threshold of the asymmetric (3,3,2) GHZ state",
+  "upload_type": "software",
+  "description": "Exact certificates (rational arithmetic in Q(sqrt m)), symmetry-reduced primal and dual PPT-mixture SDPs for the 2 x d x d GHZ family, Lindblad dynamics, a noisy-device simulation and a re-analysis of the published (3,3,2) photonic data of Malik et al. (2016). Reproduces every number and figure of the accompanying paper.",
+  "creators": [
+    {
+      "name": "Amin, MD. Nurol",
+      "affiliation": "Daffodil International University, Dhaka, Bangladesh"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "genuine multipartite entanglement",
+    "PPT mixtures",
+    "entanglement witnesses",
+    "semidefinite programming",
+    "exact certificates"
+  ]
+}

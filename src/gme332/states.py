@@ -37,6 +37,22 @@ def negativity(rho: np.ndarray, dims, parties) -> float:
     return float(-ev[ev < 0].sum())
 
 
+def negativity_rate_terms(rho, drho, dims, parties, tol=1e-9):
+    """The two parts of the one-sided derivative of N(rho + t drho) at t = 0+:
+    (negative-space term -Tr(Pi_- X'), kernel term sum_{mu<0}|mu| over the
+    spectrum of Pi_0 X' Pi_0).  Degenerate first-order perturbation theory."""
+    X  = partial_transpose(rho, dims, parties)
+    dX = partial_transpose(drho, dims, parties)
+    ev, V = np.linalg.eigh(X)
+    Vn = V[:, ev < -tol]; V0 = V[:, np.abs(ev) <= tol]
+    neg = -float(np.real(np.trace(Vn.conj().T @ dX @ Vn)))
+    ker = 0.0
+    if V0.shape[1]:
+        mu = np.linalg.eigvalsh(V0.conj().T @ dX @ V0)
+        ker = -float(mu[mu < 0].sum())
+    return neg, ker
+
+
 def negativity_right_derivative(rho, drho, dims, parties, tol=1e-9) -> float:
     """One-sided derivative d/dt N(rho + t drho) at t = 0+.
     Negative eigenspace contributes -Tr(Pi_- X'), and eigenvalues in the kernel

@@ -15,6 +15,9 @@ class QSqrt:
 
     def __init__(self, a=0, b=0, m=2):
         self.a, self.b, self.m = Fraction(a), Fraction(b), int(m)
+        r = math.isqrt(self.m)
+        if r * r == self.m and self.b:          # sqrt(m) rational: keep a canonical form (b = 0)
+            self.a, self.b = self.a + self.b * r, Fraction(0)
 
     def _c(self, o):
         return o if isinstance(o, QSqrt) else QSqrt(o, 0, self.m)
